@@ -1,8 +1,49 @@
+"use client"
 import Nav from "@/components/nav";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+export default function Login() {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-export default function Home() {
+  const isValidMail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+  
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    const email = e.currentTarget.email.value;
+    const password = e.currentTarget.password.value;
+    console.log(email, password);
+
+    if (!isValidMail(email)) {
+      setError("Email is invalid");
+      return;
+    }
+
+    if (password.trim().length < 7 || password.trim().length === 0) {
+      setError("Password is invalid");
+      return;
+    }
+
+    const res = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+    });
+    if (res?.error) {
+      setError(res.error);
+    } else {
+      setSuccess("Login successful");
+    }
+
+
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
@@ -21,7 +62,12 @@ export default function Home() {
       <div className="mt-32 flex items-center justify-center flex-col gap-10">
         <h1 className="md:text-5xl text-5xl">Login page</h1>
         <div className="h-1 border-t w-full"></div>
-        <form className=" flex items-center justify-center gap-7 flex-col w-full">
+
+        {error && <p className="text-red-500">{error}</p>}
+
+        {success && <p className="text-green-500">{success}</p>}
+
+        <form onSubmit={handleSubmit} className="flex items-center justify-center gap-7 flex-col w-full">
           <div className="flex items-start justify-start gap-3 flex-col">
             <label htmlFor="email">Email</label>
             <input
@@ -33,7 +79,7 @@ export default function Home() {
             />
           </div>
           <div className="flex items-start justify-start gap-3 flex-col">
-            <label htmlFor="email">Password</label>
+            <label htmlFor="password">Password</label>
             <input
               type="password"
               className="group rounded-lg border border-transparent px-5 py-4 transition-colors border-gray-300 bg-gray-100 dark:border-neutral-700 dark:bg-neutral-800/30"
@@ -42,7 +88,7 @@ export default function Home() {
               id="password"
             />
           </div>
-          <Button variant="default">Login</Button>
+          <Button type="submit" variant="default">Login</Button>
         </form>
         <div className="flex flex-row w-full items-center justify-center">
           <div className="h-1 border-t w-full" />
