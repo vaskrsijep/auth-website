@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import AuthProviderComponent from "./_components/AuthProviderComponent";
+import { getServerSession } from "next-auth";
+import SessionProvider from "./components/SessionProvider";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -9,18 +11,19 @@ export const metadata: Metadata = {
   description: "Auth website for 100 days of nextjs", 
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+export default async function RootLayout({
+  children,}: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const session = await getServerSession();
 
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProviderComponent>
+        <SessionProvider session={session}>
         {children}
-        </AuthProviderComponent>
+        </SessionProvider>
         </body>
     </html>
   );

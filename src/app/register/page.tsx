@@ -43,7 +43,7 @@ export default function Register() {
         setError("User already exists");
       } else if (res.status === 200) {
         setSuccess("User created successfully");
-        useRouter().push("/login");
+        
       }
     } catch (error) {
       console.log(error);

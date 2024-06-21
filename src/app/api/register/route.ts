@@ -1,33 +1,32 @@
-import User from "@/lib/models/User";
 import { connectMongoDB } from "@/lib/db";
+import User from "@/lib/models/User";
+
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 
-export const POST = async (request: any) => {    
-    await connectMongoDB();
-    
-    const {email, password} = await request.json();
+export const POST = async (request: any) => {
+  const { email, password } = await request.json();
 
-    const existingUser = await User.findOne({email});
+  await connectMongoDB();
 
-    if (existingUser) {
-        return new NextResponse("User already exists", {status: 400});
-    }
-    
-    const hashedPassword = await bcrypt.hash(password, 12);
+  const existingUser = await User.findOne({ email });
 
-    const newUser = new User({
-        email,
-        password: hashedPassword
+  if (existingUser) {
+    return new NextResponse("Email is already in use", { status: 400 });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 5);
+  const newUser = new User({
+    email,
+    password: hashedPassword,
+  });
+
+  try {
+    await newUser.save();
+    return new NextResponse("user is registered", { status: 200 });
+  } catch (err: any) {
+    return new NextResponse(err, {
+      status: 500,
     });
-
-    try {
-        await newUser.save();
-        return new NextResponse("User created successfully", {status: 200});
-    } catch (error: any) {
-        return new NextResponse(error, {
-            status: 500,
-            statusText: "Internal Server Error"
-        })
-    }
-}
+  }
+};

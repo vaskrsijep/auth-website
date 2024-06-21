@@ -1,31 +1,36 @@
 "use client"
 import Nav from "@/components/nav";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 export default function Login() {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const { data: session, status: sessionStatus } = useSession();
 
-  const isValidMail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  useEffect(() => {
+    if (sessionStatus === "authenticated") {
+      router.replace("/secret");
+    }
+  }, [sessionStatus, router]);
+
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    return emailRegex.test(email);
   };
-  
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const email = e.currentTarget.email.value;
-    const password = e.currentTarget.password.value;
-    console.log(email, password);
+    const email = e.target[0].value;
+    const password = e.target[1].value;
 
-    if (!isValidMail(email)) {
+    if (!isValidEmail(email)) {
       setError("Email is invalid");
       return;
     }
 
-    if (password.trim().length < 7 || password.trim().length === 0) {
+    if (!password || password.length < 8) {
       setError("Password is invalid");
       return;
     }
@@ -35,14 +40,19 @@ export default function Login() {
       email,
       password,
     });
+
     if (res?.error) {
-      setError(res.error);
+      setError("Invalid email or password");
+      if (res?.url) router.replace("/secret");
     } else {
-      setSuccess("Login successful");
+      setError("");
     }
-
-
   };
+
+  if (sessionStatus === "loading") {
+    return <h1>Loading...</h1>;
+  }
+
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -64,8 +74,6 @@ export default function Login() {
         <div className="h-1 border-t w-full"></div>
 
         {error && <p className="text-red-500">{error}</p>}
-
-        {success && <p className="text-green-500">{success}</p>}
 
         <form onSubmit={handleSubmit} className="flex items-center justify-center gap-7 flex-col w-full">
           <div className="flex items-start justify-start gap-3 flex-col">
@@ -97,6 +105,14 @@ export default function Login() {
           </div>
           <div className="h-1 border-t w-full" />
         </div>
+        <button
+            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+            onClick={() => {
+              signIn("github");
+            }}
+          >
+            Sign In with Github
+          </button>
       </div>
     </main>
   );
