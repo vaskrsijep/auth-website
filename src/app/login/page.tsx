@@ -13,6 +13,11 @@ export default function Login() {
     if (sessionStatus === "authenticated") {
       router.replace("/secret");
     }
+
+    if (sessionStatus === "unauthenticated") {
+      router.replace("/login");
+    }
+
   }, [sessionStatus, router]);
 
   const isValidEmail = (email: string) => {
@@ -112,6 +117,14 @@ export default function Login() {
             }}
           >
             Sign In with Github
+          </button>
+          <button
+            className="w-full bg-[#4285F4] text-white py-2 rounded hover:bg-[#4285F4]"
+            onClick={() => {
+              signIn("google");
+            }}
+          >
+            Sign In with Google
           </button>
       </div>
     </main>

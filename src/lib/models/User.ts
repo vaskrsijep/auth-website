@@ -10,6 +10,20 @@ const userSchema = new Schema({
         type: String,
         required: true,
     },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user',
+    },
+    points: {
+        type: Number,
+        default: 0,
+    },
+    name: {
+        type: String,
+    },
+}, {
+    timestamps: true,
 });
 
 const User = models.User || model('User', userSchema);

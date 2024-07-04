@@ -1,7 +1,12 @@
 import Nav from "@/components/nav";
-import Image from "next/image";
+import { getServerSession } from "next-auth";
 
-export default function Home() {
+
+export default async function Home() {
+
+  const session = await getServerSession();
+
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
@@ -16,11 +21,16 @@ export default function Home() {
       </div>
 
       <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-2 lg:text-left">
-        <a
+        {
+          session ? (
+            null
+          ) : (
+            <>
+            <a
           href="/login"
           className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
           rel="noopener noreferrer"
-        >
+          >
           <h2 className="mb-3 text-2xl font-semibold">
             Login{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
@@ -31,7 +41,6 @@ export default function Home() {
             Login to your account
           </p>
         </a>
-
         <a
           href="/register"
           className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
@@ -47,6 +56,10 @@ export default function Home() {
             Register an account
           </p>
         </a>
+          </>
+          )
+        }
+
       </div>
     </main>
   );
